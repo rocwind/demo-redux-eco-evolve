@@ -15,6 +15,16 @@ type State = {
   count: number;
 };
 
+// action creators
+export const add = (num?: number): Action => ({ type: "add", payload: num });
+export const subtract = (num?: number): Action => ({
+  type: "subtract",
+  payload: num,
+});
+
+// selectors
+export const countSelector = (state: State) => state.count;
+
 const reducer: Reducer<State, Action> = (
   state = { count: 0 },
   { type, payload = 1 }
