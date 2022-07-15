@@ -1,25 +1,37 @@
-import { createStore } from "redux";
-import { createActions, handleActions } from "redux-actions";
-import { createSelector } from "reselect";
+import {
+  configureStore,
+  createSlice,
+  PayloadAction,
+  createSelector,
+} from "@reduxjs/toolkit";
 
-// https://github.com/redux-utilities/flux-standard-action#actions
-type Action =
-  | {
-      type: "ADD";
-      payload?: number;
-    }
-  | {
-      type: "SUBTRACT";
-      payload?: number;
-    };
+type CountState = number;
 
-type State = {
-  count: number;
-};
+const defaultState: CountState = 0;
 
-// action creators
-// redux-actions is not typescript friendly
-export const { add, subtract } = createActions<number>("ADD", "SUBTRACT");
+const countSlice = createSlice({
+  name: "count",
+  initialState: defaultState,
+  reducers: {
+    add: (state, { payload = 1 }: PayloadAction<number | undefined>) => {
+      return state + payload;
+    },
+    subtract: (state, { payload = 1 }: PayloadAction<number | undefined>) => {
+      return state - payload;
+    },
+  },
+});
+
+export const { add, subtract } = countSlice.actions;
+
+export const store = configureStore({
+  reducer: {
+    count: countSlice.reducer,
+  },
+});
+
+type State = ReturnType<typeof store.getState>;
+
 // selectors
 export const countSelector = (state: State) => state.count;
 // - memorized selector, optimize for performance
@@ -27,19 +39,3 @@ export const squareSelector = createSelector(
   countSelector,
   (count) => count * count
 );
-
-const defaultState: State = { count: 0 };
-
-const reducer = handleActions<State, number>(
-  {
-    [add as any]: (state, { payload = 1 }) => ({
-      count: state.count + payload,
-    }),
-    [subtract as any]: (state, { payload = 1 }) => ({
-      count: state.count - payload,
-    }),
-  },
-  defaultState
-);
-
-export const store = createStore(reducer);
